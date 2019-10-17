@@ -1,6 +1,3 @@
-
-
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -13,17 +10,12 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javax.imageio.ImageIO;
-
 import javax.swing.*;
-
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.platform.win32.WinUser.POINT;
-
 import java.nio.file.Files;
 import java.time.Duration;
-
 import uk.co.caprica.vlcj.binding.LibVlc;
-
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.videosurface.CanvasVideoSurface;
