@@ -23,6 +23,8 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -31,16 +33,24 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 
 /**
  *
- * @author imran
+ * 
  */
-public class JavaClient {
+public class JavaClient 
+{
 	public static DatagramSocket ds;
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception 
+	{
+		JavaClient javaClient = new JavaClient(4321);
+	}
+	
+	public JavaClient(int port) throws Exception
+	{
 		ds = new DatagramSocket();
 
 		byte[] init = new byte[62000];
@@ -48,7 +58,7 @@ public class JavaClient {
 
 		InetAddress addr = InetAddress.getLocalHost();
 
-		DatagramPacket dp = new DatagramPacket(init,init.length,addr,4321);
+		DatagramPacket dp = new DatagramPacket(init,init.length,addr,port);
 
 		ds.send(dp);
 
@@ -57,22 +67,17 @@ public class JavaClient {
 		ds.receive(rcv);
 		System.out.println(new String(rcv.getData()));
 
-		System.out.println(ds.getPort());
 		Vidshow vd = new Vidshow();
 		vd.start();
 
 		String modifiedSentence;
 
 		InetAddress inetAddress = InetAddress.getLocalHost();
-		//.getByName(String hostname); "CL11"
-		System.out.println(inetAddress);
 
 		Socket clientSocket = new Socket(inetAddress, 6782);
-		DataOutputStream outToServer =
-				new DataOutputStream(clientSocket.getOutputStream());
+		DataOutputStream outToServer =	new DataOutputStream(clientSocket.getOutputStream());
 
-		BufferedReader inFromServer =
-				new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		outToServer.writeBytes("Thanks man\n");
 
 		CThread write = new CThread(inFromServer, outToServer, 0);
@@ -84,14 +89,20 @@ public class JavaClient {
 	}
 }
 
-class Vidshow extends Thread  implements ActionListener  {
+
+class Vidshow extends Thread  implements ActionListener  
+{
 
 	JFrame jf = new JFrame();
 	public static JPanel jp = new JPanel(new GridLayout(1,1));
+	JPanel opciones = new JPanel(new GridLayout(2,1));
+	JPanel opcionesInt = new JPanel(new GridLayout(1,3));
+	
 	JLabel jl = new JLabel();
 	boolean rep = true;
 	
 	public static JTextArea ta,tb;
+	JTextField txtPuerto = new JTextField();
 
 	byte[] rcvbyte = new byte[62000];
 
@@ -100,13 +111,13 @@ class Vidshow extends Thread  implements ActionListener  {
 	ImageIcon imc;
 
 
-	public Vidshow() throws Exception {
-		//sc = mysoc;
-		//sc.setTcpNoDelay(true);
+	public Vidshow() throws Exception 
+	{
+		
 		jf.setSize(300, 260);
-		jf.setTitle("Cliene");
+		jf.setTitle("Cliente");
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//jf.setAlwaysOnTop(true);
+	
 		jf.setLayout(new BorderLayout());
 		jf.setVisible(true);
 		
@@ -114,14 +125,22 @@ class Vidshow extends Thread  implements ActionListener  {
 		JButton bot=new JButton("Pausar/Reproducir");
 		bot.addActionListener(this);
 		bot.setActionCommand("PAUSAR/REP");
-		jf.add(bot,BorderLayout.SOUTH);
+		
+		JButton ok =new JButton("OK");
+		ok.addActionListener(this);
+		ok.setActionCommand("OK");
+		
+		opcionesInt.add(new JLabel("Puerto"));
+		opcionesInt.add(txtPuerto);
+		opcionesInt.add(ok);
+	
+		opciones.add(bot);
+		opciones.add(opcionesInt);
+		
+		jf.add(opciones,BorderLayout.SOUTH);
 		
 		jf.add(jp, BorderLayout.CENTER);
 		
-		
-		
-		
-
 	}
 
 	@Override
@@ -129,7 +148,8 @@ class Vidshow extends Thread  implements ActionListener  {
 
 		try {
 			System.out.println("got in");
-			do {
+			do
+			{
 				if(rep==true)
 				{
 					System.out.println("doing");
@@ -155,7 +175,8 @@ class Vidshow extends Thread  implements ActionListener  {
 				}
 			} while (true);
 
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			System.out.println("couldnt do it");
 		}
 	}
@@ -167,6 +188,17 @@ class Vidshow extends Thread  implements ActionListener  {
 			rep=!rep;
 		}
 		
+		if(e.getActionCommand().equals("OK"))
+		{
+			try 
+			{
+				JavaClient nuevoCliente = new JavaClient(Integer.parseInt(txtPuerto.getText()));
+			} 
+			catch (Exception e1) 
+			{
+				e1.printStackTrace();
+			} 
+		}
 	}
 }
 

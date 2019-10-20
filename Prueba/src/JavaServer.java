@@ -38,6 +38,7 @@ public class JavaServer
 {
 	public static InetAddress[] inet;
 	public static int[] port;
+	public static int[] port2;
 	public static int i;
 	static int count = 0;
 	public static BufferedReader[] inFromClient;
@@ -45,17 +46,18 @@ public class JavaServer
 	
 	public static void main(String[] args) throws Exception
 	{
-		JavaServer jv = new JavaServer();
+		JavaServer jv = new JavaServer(4321);
 	}
 	
-	public JavaServer() throws Exception 
+	public JavaServer(int puerto) throws Exception 
 	{
 		
 		NativeLibrary.addSearchPath(RuntimeUtil.getLibVlcLibraryName(), "c:/Program Files/VideoLAN/VLC");
 
 		JavaServer.inet = new InetAddress[30];
 		port = new int[30];
-
+		port2 = new int[30];
+		
 		ServerSocket welcomeSocket = new ServerSocket(6782);
 	
 		Socket connectionSocket[] = new Socket[30];
@@ -63,16 +65,15 @@ public class JavaServer
 		inFromClient = new BufferedReader[30];
 		outToClient = new DataOutputStream[30];
 
-		DatagramSocket serv = new DatagramSocket(4321);
-
+		DatagramSocket serv = new DatagramSocket(puerto);
 
 		byte[] buf = new byte[62000];
 
 
 		DatagramPacket dp = new DatagramPacket(buf, buf.length);
 
-
 		Canvas_Demo canv = new Canvas_Demo();
+		//Canvas_Demo canv2 = new Canvas_Demo();
 
 		i = 0;
 
@@ -83,10 +84,10 @@ public class JavaServer
 			System.out.println(serv.getPort());
 			
 			serv.receive(dp);
+			//serv2.receive(dp);
 			
 			System.out.println(new String(dp.getData()));
 			buf = "starts".getBytes();
-
 
 			inet[i] = dp.getAddress();
 			port[i] = dp.getPort();
@@ -94,8 +95,10 @@ public class JavaServer
 
 			DatagramPacket dsend = new DatagramPacket(buf, buf.length, inet[i], port[i]);
 			serv.send(dsend);
+			//serv2.send(dsend);
 
 			Vidthread sendvid = new Vidthread(serv);
+			//Vidthread sendvid2= new Vidthread(serv2);
 
 			System.out.println("waiting\n ");
 			connectionSocket[i] = welcomeSocket.accept();
@@ -118,6 +121,7 @@ public class JavaServer
 
 			System.out.println(inet[i]);
 			sendvid.start();
+			//sendvid2.start();
 
 			i++;
 
@@ -265,9 +269,7 @@ class Canvas_Demo {
 
 		// Playing the video
 
-		//System.out.println("video.mp4");
 		mediaPlayer.playMedia("video.mp4");
-	
 	
 		mypanel.revalidate();
 		mypanel.repaint();
