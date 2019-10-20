@@ -34,84 +34,119 @@ import java.awt.image.BufferedImage;
  *
  * @author
  */
-public class JavaServer 
+public class JavaServer extends Thread
 {
 	public static InetAddress[] inet;
 	public static int[] port;
-
+	public int puerto;
 	public static int i;
 	static int count = 0;
 	public static BufferedReader[] inFromClient;
 	public static DataOutputStream[] outToClient;
-	
+	public static Canvas_Demo[] canv;
 	public static void main(String[] args) throws Exception
 	{
 		JavaServer jv = new JavaServer(4321);
+		JavaServer jv1 = new JavaServer(4322);
+		//JavaServer jv2 = new JavaServer(4323);
+		//JavaServer jv3 = new JavaServer(4324);
+		canv=new Canvas_Demo[4];
+		
+		jv1.start();
+		jv.start();
+		
+		//jv2.start();
+		//jv3.start();
 	}
 	
 	public JavaServer(int puerto) throws Exception 
 	{		
 		NativeLibrary.addSearchPath(RuntimeUtil.getLibVlcLibraryName(), "c:/Program Files/VideoLAN/VLC");
-
+		this.puerto=puerto;
 		JavaServer.inet = new InetAddress[30];
 		port = new int[30];
 		
-		ServerSocket welcomeSocket = new ServerSocket(6782);
-	
-		Socket connectionSocket[] = new Socket[30];
+	}
+	public void run() {
+		try {
+			int cont=0;
+			ServerSocket welcomeSocket=null;
+			int ssP=6782;
+			while(cont<=3) {
+				try {
+					welcomeSocket = new ServerSocket(ssP);
+					break;
+				}catch(Exception e){
+					ssP++;
+					cont++;
+					continue;
+				}
+				
+			}
 		
-		inFromClient = new BufferedReader[30];
-		outToClient = new DataOutputStream[30];
-
-		DatagramSocket serv = new DatagramSocket(puerto);
-		DatagramSocket serv2 = new DatagramSocket(1234);
-		
-		byte[] buf = new byte[62000];
-		byte[] buf2 = new byte[62000];
-
-		DatagramPacket dp = new DatagramPacket(buf, buf.length);
-		DatagramPacket dp2 = new DatagramPacket(buf, buf.length);
-		
-		Canvas_Demo canv = new Canvas_Demo("video.mp4");
-		Canvas_Demo canv2 = new Canvas_Demo("video2.mp4");
-		
-		i = 0;
-
-		SThread[] st = new SThread[30];
-		while (true)
-		{			
-			serv.receive(dp);
+			Socket connectionSocket[] = new Socket[30];
 			
-			buf = "starts".getBytes();
+			inFromClient = new BufferedReader[30];
+			outToClient = new DataOutputStream[30];
 
-			inet[i] = dp.getAddress();
-			port[i] = dp.getPort();
+			DatagramSocket serv = new DatagramSocket(puerto);
 			
+			byte[] buf = new byte[62000];
 
-			DatagramPacket dsend = new DatagramPacket(buf, buf.length, inet[i], port[i]);
-			serv.send(dsend);
-
-			Vidthread sendvid = new Vidthread(serv);
-			Vidthread sendvid2 = new Vidthread(serv2);
-			
-			connectionSocket[i] = welcomeSocket.accept();
-
-			inFromClient[i] = new BufferedReader(new InputStreamReader(connectionSocket[i].getInputStream()));
-			outToClient[i] = new DataOutputStream(connectionSocket[i].getOutputStream());
-			outToClient[i].writeBytes("Connected: from Server\n");
-			
-			st[i] = new SThread(i);
-			st[i].start();
-			
-			sendvid.start();
-			sendvid2.start();
-			
-			i++;
-
-			if (i == 30)
-			{
+			DatagramPacket dp = new DatagramPacket(buf, buf.length);
+			String vid="video.mp4";
+			switch (puerto) {
+			case 4321:
+				vid="video.mp4";
+				break;
+			case 4322:
+				vid="video2.mp4";
+				break;
+			case 4323:
+				vid="video3.mp4";
+				break;
+			case 4324:
+				vid="video4.mp4";
+				break;
+			default:
 				break;
 			}
+			 canv[cont] = new Canvas_Demo(vid,cont+1);
+			
+			i = 0;
+
+			while (true)
+			{			
+				serv.receive(dp);
+				
+				buf = "starts".getBytes();
+
+				inet[i] = dp.getAddress();
+				port[i] = dp.getPort();
+				
+
+				DatagramPacket dsend = new DatagramPacket(buf, buf.length, inet[i], port[i]);
+				serv.send(dsend);
+
+				Vidthread sendvid = new Vidthread(serv);
+				
+				connectionSocket[i] = welcomeSocket.accept();
+
+				inFromClient[i] = new BufferedReader(new InputStreamReader(connectionSocket[i].getInputStream()));
+				outToClient[i] = new DataOutputStream(connectionSocket[i].getOutputStream());
+				outToClient[i].writeBytes("Connected: from Server\n");
+				
+				sendvid.start();
+				
+				i++;
+
+				if (i == 30)
+				{
+					break;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }
@@ -193,14 +228,14 @@ class Vidthread extends Thread
 class Canvas_Demo
 {
 	// Create a media player factory
-	private MediaPlayerFactory mediaPlayerFactory;
+	public  MediaPlayerFactory mediaPlayerFactory;
 
 	// Create a new media player instance for the run-time platform
-	private EmbeddedMediaPlayer mediaPlayer;
+	public  EmbeddedMediaPlayer mediaPlayer;
 
 	public static JPanel panel;
 	public static JPanel myjp;
-	private Canvas canvas;
+	public static Canvas canvas;
 	public static JFrame frame;
 	public static JTextArea ta;
 	public static JTextArea txinp;
@@ -208,7 +243,7 @@ class Canvas_Demo
 	String url = "D:\\DownLoads\\Video\\freerun.MP4";
 
 	// Constructor
-	public Canvas_Demo(String video) 
+	public Canvas_Demo(String video,int pos) 
 	{
 
 		// Creating a panel that while contains the canvas
@@ -231,10 +266,10 @@ class Canvas_Demo
 		mediaPlayer.setVideoSurface(videoSurface);
 
 		// Construction of the jframe :
-		frame = new JFrame("Reproductor");
+		frame = new JFrame("Reproductor"+pos);
 		frame.setLayout(new BorderLayout());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLocation(200, 0);
+		frame.setLocation(200*pos, 200*pos);
 		frame.setSize(300, 260);
 		frame.setAlwaysOnTop(true);
 
@@ -250,27 +285,5 @@ class Canvas_Demo
 	
 		mypanel.revalidate();
 		mypanel.repaint();
-	}
-}
-
-class SThread extends Thread 
-{
-	public static String clientSentence;
-	int srcid;
-	BufferedReader inFromClient = JavaServer.inFromClient[srcid];
-	DataOutputStream outToClient[] = JavaServer.outToClient;
-
-	public SThread(int a) 
-	{
-		srcid = a;
-	}
-
-	public void run()
-	{
-		while (true) 
-		{
-			Canvas_Demo.myjp.revalidate();
-			Canvas_Demo.myjp.repaint();
-		}
 	}
 }

@@ -43,10 +43,12 @@ import javax.swing.ScrollPaneConstants;
 public class JavaClient 
 {
 	public static DatagramSocket ds;
-
+	public static JavaClient javaClient;
+	public static int actPort;
 	public static void main(String[] args) throws Exception 
 	{
-		JavaClient javaClient = new JavaClient(4321);
+		actPort=4321;
+		javaClient= new JavaClient(actPort);
 	}
 	
 	public JavaClient(int port) throws Exception
@@ -89,7 +91,7 @@ public class JavaClient
 class Vidshow extends Thread  implements ActionListener  
 {
 
-	JFrame jf = new JFrame();
+	static JFrame jf = new JFrame();
 	public static JPanel jp = new JPanel(new GridLayout(1,1));
 	JPanel opciones = new JPanel(new GridLayout(2,1));
 	JPanel opcionesInt = new JPanel(new GridLayout(1,3));
@@ -187,7 +189,11 @@ class Vidshow extends Thread  implements ActionListener
 		{
 			try 
 			{
-				JavaClient nuevoCliente = new JavaClient(Integer.parseInt(txtPuerto.getText()));
+				int nextP=Integer.parseInt(txtPuerto.getText());
+				if(nextP!=JavaClient.actPort) {
+					
+					JavaClient.javaClient= new JavaClient(nextP);
+				}
 			} 
 			catch (Exception e1) 
 			{
