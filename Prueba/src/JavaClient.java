@@ -65,12 +65,9 @@ public class JavaClient
 		DatagramPacket rcv = new DatagramPacket(init, init.length);
 
 		ds.receive(rcv);
-		System.out.println(new String(rcv.getData()));
 
 		Vidshow vd = new Vidshow();
 		vd.start();
-
-		String modifiedSentence;
 
 		InetAddress inetAddress = InetAddress.getLocalHost();
 
@@ -78,7 +75,6 @@ public class JavaClient
 		DataOutputStream outToServer =	new DataOutputStream(clientSocket.getOutputStream());
 
 		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-		outToServer.writeBytes("Thanks man\n");
 
 		CThread write = new CThread(inFromServer, outToServer, 0);
 		CThread read = new CThread(inFromServer, outToServer, 1);
@@ -144,25 +140,22 @@ class Vidshow extends Thread  implements ActionListener
 	}
 
 	@Override
-	public void run() {
-
-		try {
-			System.out.println("got in");
+	public void run() 
+	{
+		try 
+		{
 			do
 			{
-				if(rep==true)
+				if(rep)
 				{
-					System.out.println("doing");
-					System.out.println(JavaClient.ds.getPort());
-
 					JavaClient.ds.receive(dp);
-					System.out.println("received");
+
 					ByteArrayInputStream bais = new ByteArrayInputStream(rcvbyte);
 
 					bf = ImageIO.read(bais);
 
-					if (bf != null) {
-						//jf.setVisible(true);
+					if (bf != null) 
+					{
 						imc = new ImageIcon(bf);
 						jl.setIcon(imc);
 						jp.add(jl);
@@ -171,18 +164,20 @@ class Vidshow extends Thread  implements ActionListener
 					}
 					jf.revalidate();
 					jf.repaint();
-
 				}
-			} while (true);
+			}
+			while (true);
 
-		} catch (Exception e)
+		} 
+		catch (Exception e)
 		{
-			System.out.println("couldnt do it");
+			
 		}
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) 
+	{
 		if(e.getActionCommand().equals("PAUSAR/REP"))
 		{
 			rep=!rep;
@@ -202,73 +197,55 @@ class Vidshow extends Thread  implements ActionListener
 	}
 }
 
-class CThread extends Thread {
-
+class CThread extends Thread
+{
 	BufferedReader inFromServer;
 	Button sender = new Button("Send Text");
 	DataOutputStream outToServer;
-	public static String sentence;
 	int RW_Flag;
 
-	public CThread(BufferedReader in, DataOutputStream out, int rwFlag) {
+	public CThread(BufferedReader in, DataOutputStream out, int rwFlag) 
+	{
 		inFromServer = in;
 		outToServer = out;
 		RW_Flag = rwFlag;
 		if(rwFlag == 0)
-		{
-			
-			sender.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					sentence = Vidshow.tb.getText();
-					Vidshow.ta.append("From myself: "+sentence+"\n");
-					try{
-						outToServer.writeBytes(sentence + '\n');
-					}
-					catch(Exception E)
-					{
-
-					}
-					Vidshow.tb.setText(null);
+		{	
+			sender.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e) 
+				{
+						Vidshow.tb.setText(null);
 				}
-			});
+			}
+					);
 		}
 		start();
 	}
 
-	public void run() {
-		String mysent;
-		try {
-			while (true) {
-				if (RW_Flag == 0) {
-					if(sentence.length()>0)
-					{
-
-						Vidshow.ta.append(sentence+"\n");
-						Vidshow.ta.setCaretPosition(Vidshow.ta.getDocument().getLength());
-						
-						Vidshow.jp.revalidate();
-						Vidshow.jp.repaint();
-						outToServer.writeBytes(sentence + '\n');
-						sentence = null;
-						Vidshow.tb.setText(null);
-					}
-				} else if (RW_Flag == 1) {
-					mysent = inFromServer.readLine();
-
-					Vidshow.ta.append(mysent+"\n");
-					Vidshow.ta.setCaretPosition(Vidshow.ta.getDocument().getLength());
+	public void run() 
+	{
+		try 
+		{
+			while (true)
+			{
+				if (RW_Flag == 0) 
+				{
+					Vidshow.ta.setCaretPosition(Vidshow.ta.getDocument().getLength());	
 					Vidshow.jp.revalidate();
 					Vidshow.jp.repaint();
-
-
-
-					System.out.println("From : " + sentence);
-					sentence = null;
-
+				} 
+				else if (RW_Flag == 1)
+				{
+					String mysent = inFromServer.readLine();
+					Vidshow.ta.setCaretPosition(Vidshow.ta.getDocument().getLength());
+					Vidshow.jp.revalidate();
+					Vidshow.jp.repaint();				
 				}
 			}
-		} catch (Exception e) {
+		} 
+		catch (Exception e)
+		{
 		}
-	}}
+	}
+}
