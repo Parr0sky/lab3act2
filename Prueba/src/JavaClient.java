@@ -37,8 +37,8 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 
 /**
- *
- * 
+ *Original project: https://github.com/Imran92/Java-UDP-Video-Stream-Server.git by Imram92<br>
+ *Adapted by: Paulavelandiar, Parr0sky and srodriguezb1<br>
  */
 public class JavaClient 
 {
@@ -50,7 +50,7 @@ public class JavaClient
 		actPort=4321;
 		javaClient= new JavaClient(actPort);
 	}
-	
+
 	public JavaClient(int port) throws Exception
 	{
 		ds = new DatagramSocket();
@@ -95,10 +95,10 @@ class Vidshow extends Thread  implements ActionListener
 	public static JPanel jp = new JPanel(new GridLayout(1,1));
 	JPanel opciones = new JPanel(new GridLayout(2,1));
 	JPanel opcionesInt = new JPanel(new GridLayout(1,3));
-	
+
 	JLabel jl = new JLabel();
 	boolean rep = true;
-	
+
 	public static JTextArea ta,tb;
 	JTextField txtPuerto = new JTextField();
 
@@ -111,34 +111,34 @@ class Vidshow extends Thread  implements ActionListener
 
 	public Vidshow() throws Exception 
 	{
-		
+
 		jf.setSize(300, 260);
 		jf.setTitle("Cliente");
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	
+
 		jf.setLayout(new BorderLayout());
 		jf.setVisible(true);
-		
+
 		jp.add(jl);
 		JButton bot=new JButton("Pausar/Reproducir");
 		bot.addActionListener(this);
 		bot.setActionCommand("PAUSAR/REP");
-		
+
 		JButton ok =new JButton("OK");
 		ok.addActionListener(this);
 		ok.setActionCommand("OK");
-		
+
 		opcionesInt.add(new JLabel("Puerto"));
 		opcionesInt.add(txtPuerto);
 		opcionesInt.add(ok);
-	
+
 		opciones.add(bot);
 		opciones.add(opcionesInt);
-		
+
 		jf.add(opciones,BorderLayout.SOUTH);
-		
+
 		jf.add(jp, BorderLayout.CENTER);
-		
+
 	}
 
 	@Override
@@ -148,13 +148,13 @@ class Vidshow extends Thread  implements ActionListener
 		{
 			do
 			{
+				JavaClient.ds.receive(dp);
+
+				ByteArrayInputStream bais = new ByteArrayInputStream(rcvbyte);
+
+				bf = ImageIO.read(bais);
 				if(rep)
 				{
-					JavaClient.ds.receive(dp);
-
-					ByteArrayInputStream bais = new ByteArrayInputStream(rcvbyte);
-
-					bf = ImageIO.read(bais);
 
 					if (bf != null) 
 					{
@@ -164,16 +164,16 @@ class Vidshow extends Thread  implements ActionListener
 						jf.add(jp);
 						Thread.sleep(15);
 					}
-					jf.revalidate();
-					jf.repaint();
 				}
+				jf.revalidate();
+				jf.repaint();
 			}
 			while (true);
 
 		} 
 		catch (Exception e)
 		{
-			
+
 		}
 	}
 
@@ -184,14 +184,14 @@ class Vidshow extends Thread  implements ActionListener
 		{
 			rep=!rep;
 		}
-		
+
 		if(e.getActionCommand().equals("OK"))
 		{
 			try 
 			{
 				int nextP=Integer.parseInt(txtPuerto.getText());
 				if(nextP!=JavaClient.actPort) {
-					
+
 					JavaClient.javaClient= new JavaClient(nextP);
 				}
 			} 
@@ -221,7 +221,7 @@ class CThread extends Thread
 			{
 				public void actionPerformed(ActionEvent e) 
 				{
-						Vidshow.tb.setText(null);
+					Vidshow.tb.setText(null);
 				}
 			}
 					);

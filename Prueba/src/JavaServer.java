@@ -31,8 +31,8 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 /**
- *
- * @author
+ *Original project: https://github.com/Imran92/Java-UDP-Video-Stream-Server.git by Imram92<br>
+ *Adapted by: Paulavelandiar, Parr0sky and srodriguezb1<br>
  */
 public class JavaServer extends Thread
 {
